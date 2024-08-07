@@ -9,8 +9,9 @@ import time
 from std_msgs.msg import Bool
 
 # This code handles getting and passing data from the serial line, which includes 
-#      - the keyboard activity sensor (vibration sensor)
+#      - IGNORE THIS ONE!! the keyboard activity sensor (vibration sensor)
 #      - button response (snooze button)
+#      - pressure sensor response (sleep pad)
 
 
 # Callback to handle SIGINT and SIGTERM
@@ -25,8 +26,9 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, shutdown_callback)
     signal.signal(signal.SIGTERM, shutdown_callback)
     rospy.init_node('taps', anonymous=True)
-    key_pub = rospy.Publisher("/serial/keyboard", Bool, queue_size=100)
+    # key_pub = rospy.Publisher("/serial/keyboard", Bool, queue_size=100)
     btn_pub = rospy.Publisher("/serial/button", Bool, queue_size=1)
+    snsr_pub = rospy.Publisher("/serial/pressure", Bool, queue_size=1) #NOIDEA IF THIS IS CORRECT :-(
     r = rospy.Rate(1000)
 
     logger = logger_minimal.Logger('taps')
@@ -37,9 +39,11 @@ if __name__ == '__main__':
         logger.log('Connected', True)
         while not rospy.is_shutdown():
             msg = tap_sensor.readline().decode().strip()
-            if msg == "key":
-                logger.log('Key pressed', True)
-                key_pub.publish(True)
+            if msg == "snsr": #used to be "key" instead of "snsr"
+                # logger.log('Key pressed', True)
+                # key_pub.publish(True)
+                logger.log('Pressure pad pressed', True)
+                snsr_pub.publish(True)
             elif msg == "btn":
                 logger.log('Button pressed', True)
                 btn_pub.publish(True)

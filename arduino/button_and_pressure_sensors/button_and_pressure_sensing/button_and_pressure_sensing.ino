@@ -154,7 +154,14 @@ void loop() {
   if (snsr_break.isPressed()) {
     //str_btnpress.data = "Button pressed";
     //btn_press.publish( &str_btnpress );
-    Serial.println("snsr");
+    Serial.println("slp"); //sleeping
+    if (SERIAL_DEBUG) {
+      Serial.print("Time: "); Serial.print("millis()"); Serial.println("\t\tSensor Pressed!");
+    }
+  else if (!snsr_break.isPressed()) {
+    //str_btnpress.data = "Button pressed";
+    //btn_press.publish( &str_btnpress );
+    Serial.println("awk"); //awake
     if (SERIAL_DEBUG) {
       Serial.print("Time: "); Serial.print("millis()"); Serial.println("\t\tSensor Pressed!");
     }

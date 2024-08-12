@@ -81,6 +81,7 @@ def cozmo_loop(testing=False):
         '''
         new_behavior = "idle"
         log_message = "Working"
+        i=0
 
         # If we currently want cozmo...
         if focus_state is UserBreakState.NeedCozmo:

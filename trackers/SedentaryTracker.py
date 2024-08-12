@@ -19,9 +19,9 @@ class SedentaryTracker:
         self.configPath = str(pathlib.Path(__file__).parents[2]) + '/config.ini'
         config = configparser.ConfigParser()
         config.read(self.configPath)
-        self.sit_down_switchover_period = config['SetupSettings'].getfloat('SitDownSwitchover')
-        self.stand_up_switchover_period_short = config['SetupSettings'].getfloat('StandUpSwitchoverShort')
-        self.stand_up_switchover_period = config['SetupSettings'].getfloat('StandUpSwitchover')
+        self.sit_down_switchover_period = config['SetupSettings'].getfloat('SleepSwitchover')
+        self.stand_up_switchover_period_short = config['SetupSettings'].getfloat('AwakeSwitchoverShort')
+        self.stand_up_switchover_period = config['SetupSettings'].getfloat('AwakeSwitchover')
 
         if rospy.get_name() == '/unnamed':
             rospy.init_node('sedentary_tracker', anonymous=True)

@@ -55,7 +55,7 @@ class FocusTracker:
         config = configparser.ConfigParser()
         config.read(self.configPath)
         wakehr = config['SetupSettings'].getfloat('Wakeuphr')
-        wakemin = config['SetupSettings'].getfloat('Wakeupmin')
+        wakemin = config['SetupSettings'].getfloat('Wakeupmin') 
         bedhr = config['SetupSettings'].getfloat('Bedtimehr')
         bedmin = config['SetupSettings'].getfloat('Bedtimemin')
         snooze_time = config['SetupSettings'].getfloat('SnoozeDelay')
@@ -67,9 +67,9 @@ class FocusTracker:
             self.snooze_start_time = config['FocusState'].getfloat('SnoozeStartTime')
             #self.cozmo_active = config['FocusState'].getboolean('CozmoActive')
             self.cozmo_active = False # Rather than handle if cozmo was active and the problem was like hours ago
-            self.on_break = config['FocusState'].getboolean('Awake')
-            self.last_break_start_time = config['FocusState'].getfloat('AwakeStartTime')
-            self.last_break_ended_time = config['FocusState'].getfloat('AwakeEndTime')
+            self.on_break = config['FocusState'].getboolean('Break')
+            self.last_break_start_time = config['FocusState'].getfloat('BreakStartTime')
+            self.last_break_ended_time = config['FocusState'].getfloat('BreakEndTime')
             if self.last_break_ended_time > time.time():
                 # we've rolled over and should just reset
                 self.on_break = False
@@ -88,6 +88,13 @@ class FocusTracker:
         self.sedentary_max_time = 60*60*breaktime # time before a user should stand up n seconds
         self.sedentary_interrupt_window = 60*60*breakwindow
         self.baseline_mode = baseline_mode   # if true, then the button is for acknowledging breaks, and nothing is sent to Cozmo
+        self.wakeuphr = wakehr
+        self.wakeupmin = wakemin
+        self.bedtimehr = bedhr
+        self.bedtimemin = bedmin
+
+
+
 
     def save_state(self):
         self.key_tracker.save_state()
@@ -132,9 +139,60 @@ class FocusTracker:
             elif(not self.snooze_on and self.cozmo_active):
                 self.logger.log('call,snooze,button')
                 return UserBreakState.SnoozeTriggered
-        # Get the keyboard activity status
-        self.key_activity_state_start_time, self.key_activity = self.key_tracker.get_state()
+        # ////////////////////////////////MY CODE STARTS HERE/////////////////////////////////////////
+        # If cozmo is trying to get the user to wakeup/stand then...
+        if(self.cozmo_active):
+            if(not self.is_standing()):
+                current_time = datetime.now()
+                hour = current_time.hour
+                minute = current_time.minute
+                second = current_time.second
+                if self.istime(hour, minute, self.wakeuphr, self.wakeupmin):
+                    if(self.snooze_on):
+                        # Check if snooze time is up...
+                        if(self.get_snooze_over()):
+                        # Check if we're still sitting or working...
+                            if(not self.is_standing()): # or (self.is_standing() and self.key_activity)):
+                                self.log_message = 'call,cozmo,snooze'
+                                return_state = UserBreakState.NeedCozmo
+                    # If neither of these they probably started their break...
+                            else:
+                                self.log_message = 'call,break,snooze'
+                                return_state = UserBreakState.BreakRequest
+                    else:
+                        self.log_message = 'call,cozmo,snooze'
+                        return_state = UserBreakState.NeedCozmo
+                else:
+                    self.log_message = 'call,break,snooze'
+                    return_state = UserBreakState.BreakRequest
+            # If cozmo is trying to get the user to go to bed/sit then...
+            if(self.is_standing()):
+                current_time = datetime.now()
+                hour = current_time.hour
+                minute = current_time.minute
+                second = current_time.second
+                if self.istime(hour, minute, self.bedtimehr, self.bedtimemin):
+                    if(self.snooze_on):
+                        # Check if snooze time is up...
+                        if(self.get_snooze_over()):
+                        # Check if we're still sitting or working...
+                            if(self.is_standing()): # or (self.is_standing() and self.key_activity)):
+                                self.log_message = 'call,cozmo,snooze'
+                                return_state = UserBreakState.NeedCozmo
+                    # If neither of these they probably started their break...
+                            else:
+                                self.log_message = 'call,break,snooze'
+                                return_state = UserBreakState.BreakRequest
+                    else:
+                        self.log_message = 'call,cozmo,snooze'
+                        return_state = UserBreakState.NeedCozmo
+                else:
+                    self.log_message = 'call,break,snooze'
+                    return_state = UserBreakState.BreakRequest
 
+
+
+# //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         # If cozmo is trying to get the user to take a break then...
         if(self.cozmo_active):
             # if we're still sitting and have not reached short stand....
@@ -142,13 +200,7 @@ class FocusTracker:
                 self.sedentary_tracker.has_delayed = False
                 self.log_message = 'call,cozmo,ongoing'
                 return_state = UserBreakState.NeedCozmo
-            # Commented out because key activity delay makes cozmo a bad.
-            # or we're standing but still typing...
-            #elif(self.is_standing() and self.key_activity):
-            #    self.sedentary_tracker.has_delayed = False
-            #    self.log_message = 'call,cozmo,ongoing'
-            #    return_state = UserBreakState.NeedCozmo
-            # or the user is finally gone
+      
             else:
                 self.log_message = 'call,break,cozmo'
                 return_state = UserBreakState.BreakRequest
@@ -159,12 +211,6 @@ class FocusTracker:
                 self.break_ended()
                 self.log_message = 'stop,break,sitting'
                 return_state = UserBreakState.BreakEnded
-            # Commented out because leads to weird results
-            # if the user starts working then the break is over
-            #elif(self.key_activity and self.key_tracker.last_input_time > self.last_break_start_time):
-            #    self.break_ended()
-            #    self.log_message = 'stop,break,keyboard'
-            #    return_state = UserBreakState.BreakEnded
             else:
                 self.log_message = 'ongoing,break'
                 return_state = UserBreakState.OnBreak
@@ -224,38 +270,12 @@ class FocusTracker:
 
         return return_state
 
-    def is_start_recording(self):
-        # For the moment, don't record in baseline mode
-        if(self.baseline_mode):
-            return False
 
-        # if we're not on a break and cozmo isn't active and either:
-        #   within our interrupt band and the user is not actively typing
-        #   two minutes from timing out on sitting
-        #   two minutes from getting out of snooze time
-        if (not self.recording_tracker.is_recording and
-            #not self.on_break and not self.cozmo_active and (
-            not self.on_break):
-            if (self.can_interrupt() and not self.key_activity):
-                self.logger.log('call,recording')
-                return True # ye start the camera
-            elif (self.sedentary_tracker.get_sedentary_duration() > (self.sedentary_max_time - self.recording_offset)):
-                self.logger.log('call,recording')
-                return True # ye start the camera
-            elif (self.snooze_on and 
-                (time.time() - self.snooze_start_time) > (self.snooze_delay - self.recording_offset)):
-                self.logger.log('call,recording')
-                return True # ye start the camera
-            #else:
-            #    self.logger.log("snooze state is {}".format(self.snooze_on))
-            #    return False
-        #if (self.recording_tracker.is_recording):
-        #    self.logger.log("Currently recording")
-        #if (self.on_break):
-        #    self.logger.log("Currently on break")
-            
-        return False    # nah don't do it
-
+    def istime(hr,min,targhr,targmin,margin=1):
+        current_time = datetime.now()
+        target_time = datetime(current_time.year, current_time.month, current_time.day, targhr, targmin)
+        return abs((current_time - target_time).total_seconds()) < margin
+    
     def start_cozmo(self):
         if(not self.cozmo_active):
             self.cozmo_active = True
@@ -292,8 +312,7 @@ class FocusTracker:
         self.is_focus_break = False
         self.last_break_ended_time = time.time()
 
-    def is_returning(self):
-        return time.time() - self.last_break_ended_time < self.no_key_activity_max_time
+
 
     def get_snooze_over(self):
         if(self.snooze_on and (time.time() - self.snooze_start_time) > self.snooze_delay):
@@ -313,17 +332,7 @@ class FocusTracker:
     def can_interrupt(self):
         return (self.sedentary_tracker.get_sedentary_duration() > (self.sedentary_max_time - self.sedentary_interrupt_window))
 
-    def is_lost_focus(self):
-        return self.sedentary_tracker.is_sitting and \
-            not self.is_returning() and \
-                not self.key_activity and \
-                    self.is_key_timeout()
 
-    def is_key_timeout(self):
-        return (time.time() - self.key_activity_state_start_time) > self.no_key_activity_max_time
-
-    def is_working(self):
-        return self.key_activity and self.sedentary_tracker.is_sitting
 
 
 

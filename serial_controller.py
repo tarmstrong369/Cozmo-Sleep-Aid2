@@ -39,11 +39,14 @@ if __name__ == '__main__':
         logger.log('Connected', True)
         while not rospy.is_shutdown():
             msg = tap_sensor.readline().decode().strip()
-            if msg == "snsr": #used to be "key" instead of "snsr"
+            if msg == "slp": #used to be "key" instead of "slp"
                 # logger.log('Key pressed', True)
                 # key_pub.publish(True)
                 logger.log('Pressure pad pressed', True)
                 snsr_pub.publish(True)
+            elif msg == "awk":
+                logger.log('Pressure pad NOT pressed', True)
+                snsr_pub.publish(False)
             elif msg == "btn":
                 logger.log('Button pressed', True)
                 btn_pub.publish(True)

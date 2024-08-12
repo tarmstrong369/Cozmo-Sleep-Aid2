@@ -43,11 +43,21 @@ class FocusTracker:
         self.logger = logger_minimal.Logger('focus')
         self.logger.log('START')
 
+        # self.configPath = str(pathlib.Path(__file__).parents[2]) + '/config.ini'
+        # config = configparser.ConfigParser()
+        # config.read(self.configPath)
+        # breaktime = config['SetupSettings'].getfloat('MaxBreakInterruptHr')
+        # breakwindow = config['SetupSettings'].getfloat('InterruptWindowHr')
+        # snooze_time = config['SetupSettings'].getfloat('SnoozeDelay')
+        # record_offset = config['SetupSettings'].getfloat('RecordOffset')
+
         self.configPath = str(pathlib.Path(__file__).parents[2]) + '/config.ini'
         config = configparser.ConfigParser()
         config.read(self.configPath)
-        breaktime = config['SetupSettings'].getfloat('MaxBreakInterruptHr')
-        breakwindow = config['SetupSettings'].getfloat('InterruptWindowHr')
+        wakehr = config['SetupSettings'].getfloat('Wakeuphr')
+        wakemin = config['SetupSettings'].getfloat('Wakeupmin')
+        bedhr = config['SetupSettings'].getfloat('Bedtimehr')
+        bedmin = config['SetupSettings'].getfloat('Bedtimemin')
         snooze_time = config['SetupSettings'].getfloat('SnoozeDelay')
         record_offset = config['SetupSettings'].getfloat('RecordOffset')
 
@@ -57,9 +67,9 @@ class FocusTracker:
             self.snooze_start_time = config['FocusState'].getfloat('SnoozeStartTime')
             #self.cozmo_active = config['FocusState'].getboolean('CozmoActive')
             self.cozmo_active = False # Rather than handle if cozmo was active and the problem was like hours ago
-            self.on_break = config['FocusState'].getboolean('OnBreak')
-            self.last_break_start_time = config['FocusState'].getfloat('BreakStartTime')
-            self.last_break_ended_time = config['FocusState'].getfloat('BreakEndTime')
+            self.on_break = config['FocusState'].getboolean('Awake')
+            self.last_break_start_time = config['FocusState'].getfloat('AwakeStartTime')
+            self.last_break_ended_time = config['FocusState'].getfloat('AwakeEndTime')
             if self.last_break_ended_time > time.time():
                 # we've rolled over and should just reset
                 self.on_break = False

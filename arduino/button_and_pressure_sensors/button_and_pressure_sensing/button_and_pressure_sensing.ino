@@ -158,13 +158,13 @@ void loop() {
     if (SERIAL_DEBUG) {
       Serial.print("Time: "); Serial.print("millis()"); Serial.println("\t\tSensor Pressed!");
     }
-  else if (!snsr_break.isPressed()) {
-    //str_btnpress.data = "Button pressed";
-    //btn_press.publish( &str_btnpress );
-    Serial.println("awk"); //awake
-    if (SERIAL_DEBUG) {
-      Serial.print("Time: "); Serial.print("millis()"); Serial.println("\t\tSensor Pressed!");
-    }
+  // else if (!snsr_break.isPressed()) {
+  //   //str_btnpress.data = "Button pressed";
+  //   //btn_press.publish( &str_btnpress );
+  //   Serial.println("awk"); //awake
+  //   if (SERIAL_DEBUG) {
+  //     Serial.print("Time: "); Serial.print("millis()"); Serial.println("\t\tSensor Pressed!");
+    // }
   }
 
 }

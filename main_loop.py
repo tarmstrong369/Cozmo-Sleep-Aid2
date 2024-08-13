@@ -49,21 +49,6 @@ def cozmo_loop(testing=False):
         # Report updates to trackers
         focus_state = focus_tracker.get_state()
 
-        # Start camera if approaching sedentary, snooze, or acivity limit
-        # get the timer recording checks from the tracker, and no recording if baseline mode
-        #if  not recorder.recording and focus_tracker.is_start_recording():
-        if focus_tracker.is_start_recording():
-            logger.log("Recording start.", printing=True)
-            webcam_pub.publish(True)
-
-        #status_logger.log("--- Logic Status Summary ---")
-        #status_logger.log("Focus state is: {}".format(focus_state))
-        #status_logger.log("Cozmo getting attention: {}".format(cozmo.getting_attention()))
-        #status_logger.log("Cozmo is idle: {}".format(cozmo.is_idle()))
-        #status_logger.log("Cozmo behavior is: {}".format(cozmo.current_behavior))
-        #status_logger.log("Cozmo is picked up: {}".format(cozmo.is_picked_up()))
-        #status_logger.log("Cozmo is charging: {}".format(cozmo.is_charging()))
-
         '''
         state transitions:
         stop cozmo:
@@ -84,7 +69,7 @@ def cozmo_loop(testing=False):
         i=0
 
         # If we currently want cozmo...
-        if focus_state is UserBreakState.NeedCozmo:
+        if focus_state is UserBreakState.NeedCozmow:
             # if cozmo is not currently active...
             if not focus_tracker.cozmo_active:
                 # Start up cozmo
@@ -99,51 +84,85 @@ def cozmo_loop(testing=False):
             elif not cozmo.is_idle() and cozmo.is_picked_up() and cozmo.getting_attention():
                 if mode_state == "cozmo":
                     cozmo.run_new_behavior("airborne")
-            # else if cozmo is currently idle and has probably completed the attention behavior...
-            elif cozmo.is_idle():
-                # Cozmo was ignored, call snooze
-                focus_tracker.start_snooze()
-                log_message = "Start snooze"
+        if focus_state is UserBreakState.NeedCozmob:
+            # if cozmo is not currently active...
+            if not focus_tracker.cozmo_active:
+                # Start up cozmo
+                focus_tracker.start_cozmo()
+                if mode_state == "cozmo":
+                    new_behavior = "attention"
+                    if cozmo.is_picked_up():
+                        new_behavior = "airborne"
                 cozmo.run_new_behavior(new_behavior)
+                log_message = "Cozmo Called."
+            # if cozmo is running and picked up...
+            elif not cozmo.is_idle() and cozmo.is_picked_up() and cozmo.getting_attention():
+                if mode_state == "cozmo":
+                    cozmo.run_new_behavior("airborne")
         # else if we want to snooze...
-        elif focus_state is UserBreakState.SnoozeTriggered:
+        elif focus_state is UserBreakState.SnoozeTriggeredw1:
+            # call snooze
+            focus_tracker.start_snooze()
+            cozmo.run_new_behavior(new_behavior)
+            log_message = "Start snooze"
+        elif focus_state is UserBreakState.SnoozeTriggeredw2:
+            # call snooze
+            focus_tracker.start_snooze()
+            cozmo.run_new_behavior(new_behavior)
+            log_message = "Start snooze"
+        elif focus_state is UserBreakState.SnoozeTriggeredw3:
+            # call snooze
+            focus_tracker.start_snooze()
+            cozmo.run_new_behavior(new_behavior)
+            log_message = "Start snooze"
+        elif focus_state is UserBreakState.SnoozeTriggeredb1:
+            # call snooze
+            focus_tracker.start_snooze()
+            cozmo.run_new_behavior(new_behavior)
+            log_message = "Start snooze"
+        elif focus_state is UserBreakState.SnoozeTriggeredb2:
+            # call snooze
+            focus_tracker.start_snooze()
+            cozmo.run_new_behavior(new_behavior)
+            log_message = "Start snooze"
+        elif focus_state is UserBreakState.SnoozeTriggeredb3:
             # call snooze
             focus_tracker.start_snooze()
             cozmo.run_new_behavior(new_behavior)
             log_message = "Start snooze"
         # else if we're starting a break
-        elif focus_state is UserBreakState.BreakRequest:
-            # start the break
-            focus_tracker.break_started()
-            log_message = "Break started"
-            # if cozmo is currently active...
-            if not cozmo.is_idle():
-                # and it's the attention getting phase
-                if cozmo.getting_attention() or cozmo.current_behavior == "airborne":
-                    # run a success routing
-                    if mode_state == "cozmo":
-                        cozmo.run_new_behavior("goal")
-                    log_message = "Goal achieved start."
-                # or it's not the success routine
-                elif not cozmo.current_behavior == "goal":
-                    # stop cozmo
-                    cozmo.run_new_behavior(new_behavior)
+        # elif focus_state is UserBreakState.BreakRequest:
+        #     # start the break
+        #     focus_tracker.break_started()
+        #     log_message = "Break started"
+        #     # if cozmo is currently active...
+        #     if not cozmo.is_idle():
+        #         # and it's the attention getting phase
+        #         if cozmo.getting_attention() or cozmo.current_behavior == "airborne":
+        #             # run a success routing
+        #             if mode_state == "cozmo":
+        #                 cozmo.run_new_behavior("goal")
+        #             log_message = "Goal achieved start."
+        #         # or it's not the success routine
+        #         elif not cozmo.current_behavior == "goal":
+        #             # stop cozmo
+        #             cozmo.run_new_behavior(new_behavior)
         # else if there's no break
-        elif focus_state is UserBreakState.NoBreak:
-            # if cozmo is currently active...
-            if not cozmo.is_idle():
-                # and it's the attention or airborne states
-                if cozmo.current_behavior == "attention" or cozmo.current_behavior == "airborne":
-                    # then stop and cancel the likely break request
-                    focus_tracker.cancel_break()
-                    cozmo.run_new_behavior(new_behavior)
-                    log_message = "Attention Cancel"
-        # else if we're on a break...
-        elif focus_state is UserBreakState.OnBreak:
-            log_message = "On break"
-        # else if the break has ended...
-        elif focus_state is UserBreakState.BreakEnded:
-            log_message = "Break ended"
+        # elif focus_state is UserBreakState.NoBreak:
+        #     # if cozmo is currently active...
+        #     if not cozmo.is_idle():
+        #         # and it's the attention or airborne states
+        #         if cozmo.current_behavior == "attention" or cozmo.current_behavior == "airborne":
+        #             # then stop and cancel the likely break request
+        #             focus_tracker.cancel_break()
+        #             cozmo.run_new_behavior(new_behavior)
+        #             log_message = "Attention Cancel"
+        # # else if we're on a break...
+        # elif focus_state is UserBreakState.OnBreak:
+        #     log_message = "On break"
+        # # else if the break has ended...
+        # elif focus_state is UserBreakState.BreakEnded:
+        #     log_message = "Break ended"
         
 
         # A routine is going, continue it

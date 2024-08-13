@@ -46,8 +46,8 @@ class FocusTracker:
         # self.configPath = str(pathlib.Path(__file__).parents[2]) + '/config.ini'
         # config = configparser.ConfigParser()
         # config.read(self.configPath)
-        # breaktime = config['SetupSettings'].getfloat('MaxBreakInterruptHr')
-        # breakwindow = config['SetupSettings'].getfloat('InterruptWindowHr')
+        breaktime = config['SetupSettings'].getfloat('MaxBreakInterruptHr')
+        breakwindow = config['SetupSettings'].getfloat('InterruptWindowHr')
         # snooze_time = config['SetupSettings'].getfloat('SnoozeDelay')
         # record_offset = config['SetupSettings'].getfloat('RecordOffset')
 
@@ -92,6 +92,8 @@ class FocusTracker:
         self.wakeupmin = wakemin
         self.bedtimehr = bedhr
         self.bedtimemin = bedmin
+        self.i=0
+        self.j=0
 
 
 
@@ -149,47 +151,58 @@ class FocusTracker:
                 second = current_time.second
                 if self.istime(hour, minute, self.wakeuphr, self.wakeupmin):
                     if(self.snooze_on):
+                        if self.i<3:
                         # Check if snooze time is up...
-                        if(self.get_snooze_over()):
-                        # Check if we're still sitting or working...
-                            if(not self.is_standing()): # or (self.is_standing() and self.key_activity)):
-                                self.log_message = 'call,cozmo,snooze'
-                                return_state = UserBreakState.NeedCozmo
-                    # If neither of these they probably started their break...
-                            else:
-                                self.log_message = 'call,break,snooze'
-                                return_state = UserBreakState.BreakRequest
+                            if(self.get_snooze_over()):
+                            # Check if we're still sitting or working...
+                                if self.i == 0:
+                                    if(not self.is_standing()):
+                                        self.log_message = 'call,cozmo,Wsnooze1'
+                                        return_state = UserBreakState.SnoozeTriggeredw1
+                                        self.i=1
+                                elif self.i == 1:
+                                    if(not self.is_standing()):
+                                        self.log_message = 'call,cozmo,Wsnooze2'
+                                        return_state = UserBreakState.SnoozeTriggeredw2
+                                        self.i=2
+                                elif self.i == 2:
+                                    if(not self.is_standing()):
+                                        self.log_message = 'call,cozmo,Wsnooze3'
+                                        return_state = UserBreakState.SnoozeTriggeredw3
+                                        self.i=4
                     else:
-                        self.log_message = 'call,cozmo,snooze'
-                        return_state = UserBreakState.NeedCozmo
-                else:
-                    self.log_message = 'call,break,snooze'
-                    return_state = UserBreakState.BreakRequest
-            # If cozmo is trying to get the user to go to bed/sit then...
-            if(self.is_standing()):
+                        self.log_message = 'call,cozmo,ongoing'
+                        return_state = UserBreakState.NeedCozmow
+         # If we are already awake and need to go to bed 
+            elif(self.is_standing):
                 current_time = datetime.now()
                 hour = current_time.hour
                 minute = current_time.minute
                 second = current_time.second
                 if self.istime(hour, minute, self.bedtimehr, self.bedtimemin):
                     if(self.snooze_on):
+                        if self.j<3:
                         # Check if snooze time is up...
-                        if(self.get_snooze_over()):
-                        # Check if we're still sitting or working...
-                            if(self.is_standing()): # or (self.is_standing() and self.key_activity)):
-                                self.log_message = 'call,cozmo,snooze'
-                                return_state = UserBreakState.NeedCozmo
-                    # If neither of these they probably started their break...
-                            else:
-                                self.log_message = 'call,break,snooze'
-                                return_state = UserBreakState.BreakRequest
+                            if(self.get_snooze_over()):
+                            # Check if we're still sitting or working...
+                                if self.j == 0:
+                                    if(self.is_standing()):
+                                        self.log_message = 'call,cozmo,Bsnooze1'
+                                        return_state = UserBreakState.SnoozeTriggeredb1
+                                        self.j=1
+                                elif self.j == 1:
+                                    if(self.is_standing()):
+                                        self.log_message = 'call,cozmo,Bsnooze2'
+                                        return_state = UserBreakState.SnoozeTriggeredb2
+                                        self.j=2
+                                elif self.j == 2:
+                                    if(self.is_standing()):
+                                        self.log_message = 'call,cozmo,Bsnooze3'
+                                        return_state = UserBreakState.SnoozeTriggeredb3
+                                        self.j=4
                     else:
-                        self.log_message = 'call,cozmo,snooze'
-                        return_state = UserBreakState.NeedCozmo
-                else:
-                    self.log_message = 'call,break,snooze'
-                    return_state = UserBreakState.BreakRequest
-
+                        self.log_message = 'call,cozmo,ongoing'
+                        return_state = UserBreakState.NeedCozmob
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

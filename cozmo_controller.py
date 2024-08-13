@@ -9,6 +9,8 @@ import math
 import logging
 import pathlib
 import os
+import numpy as np
+from PIL import Image
 from routines import actionlib
 from routines import emotions
 from custom_exceptions import IncorrectCozmoVersionError
@@ -263,19 +265,183 @@ class CozmoController:
     def get_behavior(self, behavior_name):
         behavior_list = []
 
-        if behavior_name == "attention":
-            #actions = actionlib.library.get_act_type()
-            #behavior_list, repeats = actionlib.library.get_attention_getting_walk_route(actions)
-            behavior_list, group, behavior_names = actionlib.library.get_basic_attention_routine()
-            actprint = "Behavior group is:\n"
-            actprint += actionlib.ActionType(group).name
-            actprint += "\n"
-            actprint += "Behaviors are:\n"
-            for act in behavior_names:
-                actprint += act
-                actprint += "\n"
-            self.logger.log(actprint)
+        # if behavior_name == "attention":
+        #     #actions = actionlib.library.get_act_type()
+        #     #behavior_list, repeats = actionlib.library.get_attention_getting_walk_route(actions)
+        #     behavior_list, group, behavior_names = actionlib.library.get_basic_attention_routine()
+        #     actprint = "Behavior group is:\n"
+        #     actprint += actionlib.ActionType(group).name
+        #     actprint += "\n"
+        #     actprint += "Behaviors are:\n"
+        #     for act in behavior_names:
+        #         actprint += act
+        #         actprint += "\n"
+        #     self.logger.log(actprint)
+        if behavior_name == "attentionw":
+            # Raise head.
+            angle = (pycozmo.robot.MAX_HEAD_ANGLE.radians - pycozmo.robot.MIN_HEAD_ANGLE.radians) / 2.0
+            self.cli.set_head_angle(angle)
+            time.sleep(1)
+              # List of face expressions.
+            expressions = [
+                # pycozmo.expressions.Anger(),
+                # pycozmo.expressions.Sadness(),
+                # pycozmo.expressions.Happiness(),
+                # pycozmo.expressions.Disgust(),
+                # pycozmo.expressions.Fear(),
+                # pycozmo.expressions.Pleading(),
+                # pycozmo.expressions.Vulnerability(),
+                # pycozmo.expressions.Despair(),
+                # pycozmo.expressions.Guilt(),
+                # pycozmo.expressions.Disappointment(),
+                # pycozmo.expressions.Embarrassment(),
+                # pycozmo.expressions.Horror(),
+                # pycozmo.expressions.Skepticism(),
+                # pycozmo.expressions.Annoyance(),
+                # pycozmo.expressions.Fury(),
+                # pycozmo.expressions.Suspicion(),
+                # pycozmo.expressions.Rejection(),
+                # pycozmo.expressions.Boredom(),
+                # pycozmo.expressions.Tiredness(),
+                pycozmo.expressions.Asleep(),
+                pycozmo.expressions.Surprise(),
+                # pycozmo.expressions.Confusion(),
+                # pycozmo.expressions.Amazement(),
+                pycozmo.expressions.Excitement(),
+            ]
 
+            # Base face expression.
+            base_face = pycozmo.expressions.Neutral()
+
+            rate = pycozmo.robot.FRAME_RATE
+            timer = pycozmo.util.FPSTimer(rate)
+            for expression in expressions:
+
+                # Transition from base face to expression and back.
+                for from_face, to_face in ((base_face, expression), (expression, base_face)):
+
+                    if to_face != base_face:
+                        print(to_face.__class__.__name__)
+
+                    # Generate transition frames.
+                    face_generator = pycozmo.procedural_face.interpolate(from_face, to_face, rate)
+                    for face in face_generator:
+
+                        # Render face image.
+                        im = face.render()
+
+                        # The Cozmo protocol expects a 128x32 image, so take only the even lines.
+                        np_im = np.array(im)
+                        np_im2 = np_im[::2]
+                        im2 = Image.fromarray(np_im2)
+
+                        # Display face image.
+                        self.cli.display_image(im2)
+
+                        # Maintain frame rate.
+                        timer.sleep()
+
+                    # Pause for 1s.
+                    for i in range(rate):
+                        timer.sleep()
+            #Roll Forward
+            self.cli.drive_wheels(lwheel_speed=50.0, rwheel_speed=50.0, duration=3.0)
+
+            #Spin length
+            j=3
+            i=0
+            while i<j:
+                #Spin
+                self.cli.drive_wheels(lwheel_speed=50.0, rwheel_speed=-50.0, duration=5.0)
+                self.cli.set_lift_height(pycozmo.MAX_LIFT_HEIGHT.mm)
+                time.sleep(1)
+                self.cli.set_lift_height(pycozmo.MIN_LIFT_HEIGHT.mm)
+                time.sleep(1)
+                i=i+1
+        elif behavior_name == "attentionb":
+            self.cli.drive_wheels(lwheel_speed=25.0, rwheel_speed=25.0, duration=4.0)
+
+            #Spin length
+            j=3
+            i=0
+            while i<j:
+                #Spin
+                self.cli.drive_wheels(lwheel_speed=25.0, rwheel_speed=-25.0, duration=12.0)
+                self.cli.set_lift_height(pycozmo.MAX_LIFT_HEIGHT.mm)
+                time.sleep(1)
+                self.cli.set_lift_height(pycozmo.MIN_LIFT_HEIGHT.mm)
+                time.sleep(1)
+                i=i+1
+
+
+                # Raise head.
+            angle = (pycozmo.robot.MAX_HEAD_ANGLE.radians - pycozmo.robot.MIN_HEAD_ANGLE.radians) / 2.0
+            self.cli.set_head_angle(angle)
+            time.sleep(1)
+
+            # List of face expressions.
+            expressions = [
+                # pycozmo.expressions.Anger(),
+                # pycozmo.expressions.Sadness(),
+                # pycozmo.expressions.Happiness(),
+                # pycozmo.expressions.Disgust(),
+                # pycozmo.expressions.Fear(),
+                pycozmo.expressions.Pleading(),
+                # pycozmo.expressions.Vulnerability(),
+                # pycozmo.expressions.Despair(),
+                # pycozmo.expressions.Guilt(),
+                # pycozmo.expressions.Disappointment(),
+                # pycozmo.expressions.Embarrassment(),
+                # pycozmo.expressions.Horror(),
+                # pycozmo.expressions.Skepticism(),
+                # pycozmo.expressions.Annoyance(),
+                # pycozmo.expressions.Fury(),
+                # pycozmo.expressions.Suspicion(),
+                # pycozmo.expressions.Rejection(),
+                # pycozmo.expressions.Boredom(),
+                pycozmo.expressions.Tiredness(),
+                pycozmo.expressions.Asleep(),
+                pycozmo.expressions.Asleep(),
+                # pycozmo.expressions.Surprise(),
+                # pycozmo.expressions.Confusion(),
+                # pycozmo.expressions.Amazement(),
+                # pycozmo.expressions.Excitement(),
+            ]
+
+            # Base face expression.
+            base_face = pycozmo.expressions.Neutral()
+
+            rate = pycozmo.robot.FRAME_RATE
+            timer = pycozmo.util.FPSTimer(rate)
+            for expression in expressions:
+
+                # Transition from base face to expression and back.
+                for from_face, to_face in ((base_face, expression), (expression, base_face)):
+
+                    if to_face != base_face:
+                        print(to_face.__class__.__name__)
+
+                    # Generate transition frames.
+                    face_generator = pycozmo.procedural_face.interpolate(from_face, to_face, rate)
+                    for face in face_generator:
+
+                        # Render face image.
+                        im = face.render()
+
+                        # The Cozmo protocol expects a 128x32 image, so take only the even lines.
+                        np_im = np.array(im)
+                        np_im2 = np_im[::2]
+                        im2 = Image.fromarray(np_im2)
+
+                        # Display face image.
+                        self.cli.display_image(im2)
+
+                        # Maintain frame rate.
+                        timer.sleep()
+
+                    # Pause for 1s.
+                    for i in range(rate):
+                        timer.sleep()
         elif behavior_name == "goal":
             behavior_list, repeats = actionlib.library.get_success_routine()
 

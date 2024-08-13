@@ -49,7 +49,7 @@
 
 #define SENSOR_PIN 2
 
-#define SERIAL_DEBUG true
+#define SERIAL_DEBUG false
 #define BUTTON_PIN 3
 
 // Root mean square variables

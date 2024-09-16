@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="workplace_companion_robot" name="cozmo" type="main_loop.py" cwd="node" output="screen" respawn="true" />
+  <node pkg="workplace_companion_robot" name="taps" type="serial_controller.py" cwd="node" respawn="true" />
+</launch>

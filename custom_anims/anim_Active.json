@@ -1,0 +1,64 @@
+{
+    "clips": [
+        {
+            "Name": "anim_SHARELAB_active_spin",
+            "keyframes": {
+                "LiftHeightKeyFrame": [],
+                "ProceduralFaceKeyFrame": [],
+                "HeadAngleKeyFrame": [],
+                "RobotAudioKeyFrame": [],
+                "BackpackLightsKeyFrame": [],
+                "FaceAnimationKeyFrame": [],
+                "EventKeyFrame": [],
+                "BodyMotionKeyFrame": [],
+                "RecordHeadingKeyFrame": [],
+                "TurnToRecordedHeadingKeyFrame": []
+            }
+        },
+        {
+            "Name": "anim_SHARELAB_active_race",
+            "keyframes": {
+                "LiftHeightKeyFrame": [],
+                "ProceduralFaceKeyFrame": [],
+                "HeadAngleKeyFrame": [],
+                "RobotAudioKeyFrame": [],
+                "BackpackLightsKeyFrame": [],
+                "FaceAnimationKeyFrame": [],
+                "EventKeyFrame": [],
+                "BodyMotionKeyFrame": [],
+                "RecordHeadingKeyFrame": [],
+                "TurnToRecordedHeadingKeyFrame": []
+            }
+        },
+        {
+            "Name": "anim_SHARELAB_active_twitch",
+            "keyframes": {
+                "LiftHeightKeyFrame": [],
+                "ProceduralFaceKeyFrame": [],
+                "HeadAngleKeyFrame": [],
+                "RobotAudioKeyFrame": [],
+                "BackpackLightsKeyFrame": [],
+                "FaceAnimationKeyFrame": [],
+                "EventKeyFrame": [],
+                "BodyMotionKeyFrame": [],
+                "RecordHeadingKeyFrame": [],
+                "TurnToRecordedHeadingKeyFrame": []
+            }
+        },
+        {
+            "Name": "anim_SHARELAB_active_square",
+            "keyframes": {
+                "LiftHeightKeyFrame": [],
+                "ProceduralFaceKeyFrame": [],
+                "HeadAngleKeyFrame": [],
+                "RobotAudioKeyFrame": [],
+                "BackpackLightsKeyFrame": [],
+                "FaceAnimationKeyFrame": [],
+                "EventKeyFrame": [],
+                "BodyMotionKeyFrame": [],
+                "RecordHeadingKeyFrame": [],
+                "TurnToRecordedHeadingKeyFrame": []
+            }
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="workplace_companion_robot" name="cozmo" type="main_loop.py" cwd="node" output="screen" respawn="true" />
+  <node pkg="workplace_companion_robot" name="sim" type="bluetooth_simulator.py" cwd="node" respawn="true" />
+  <node pkg="workplace_companion_robot" name="webcam" type="webcam_recorder.py" cwd="node" respawn="true" />
+  <node pkg="workplace_companion_robot" name="taps" type="serial_controller.py" cwd="node" respawn="true" />
+  <node pkg="workplace_companion_robot" name="audio" type="audio_recorder.py" cwd="node" respawn="true"/>
+</launch>
